@@ -639,9 +639,12 @@ namespace fc
               os << v.as_string();
               return;
          case variant::string_type:
-              escape_string( v.get_string(), os );
+             escape_string( v.get_string(), os );
               return;
-         case variant::blob_type:
+          case variant::no_escape_string_type:
+              os << v.get_string();
+              return;
+          case variant::blob_type:
               escape_string( v.as_string(), os );
               return;
          case variant::array_type:
