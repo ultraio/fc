@@ -199,7 +199,8 @@ namespace fc
            string_type = 5,
            array_type  = 6,
            object_type = 7,
-           blob_type   = 8
+           blob_type   = 8,
+           no_escape_string = 9
         };
 
         /// Constructs a null_type variant
