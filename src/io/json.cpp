@@ -646,7 +646,10 @@ namespace fc
          case variant::string_type:
               escape_string( v.get_string(), os, deadline );
               return;
-         case variant::blob_type:
+          case variant::no_escape_string_type:
+              os << v.get_string();
+              return;
+          case variant::blob_type:
               escape_string( v.as_string(), os, deadline );
               return;
          case variant::array_type:

@@ -199,7 +199,8 @@ namespace fc
            string_type = 5,
            array_type  = 6,
            object_type = 7,
-           blob_type   = 8
+           blob_type   = 8,
+           no_escape_string_type = 9 // ultra-adam
         };
 
         /// Constructs a null_type variant
@@ -225,6 +226,7 @@ namespace fc
         variant( bool val );
         variant( blob val );
         variant( fc::string val );
+        variant( std::string val, bool escape ); // ultra-adam
         variant( variant_object );
         variant( mutable_variant_object );
         variant( variants );
