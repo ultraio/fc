@@ -135,6 +135,16 @@ variant::variant( fc::string val )
    *reinterpret_cast<string**>(this)  = new string( fc::move(val) );
    set_variant_type( this, string_type );
 }
+
+//ultra-adam
+variant::variant( std::string val, bool escape )
+{
+    *reinterpret_cast<string**>(this)  = new string( std::move(val) );
+    if(escape)
+        set_variant_type( this, string_type );
+    else
+        set_variant_type(this, no_escape_string_type );
+}
 variant::variant( blob val )
 {
    *reinterpret_cast<blob**>(this)  = new blob( fc::move(val) );
@@ -175,6 +185,7 @@ void variant::clear()
         delete *reinterpret_cast<variants**>(this);
         break;
      case string_type:
+     case no_escape_string_type:
         delete *reinterpret_cast<string**>(this);
         break;
      case blob_type:
@@ -205,6 +216,11 @@ variant::variant( const variant& v )
              new string(**reinterpret_cast<const const_string_ptr*>(&v) );
           set_variant_type( this, string_type );
           return;
+       case no_escape_string_type: // ultra-adam
+           *reinterpret_cast<string**>(this)  =
+                   new string(**reinterpret_cast<const const_string_ptr*>(&v) );
+           set_variant_type(this, no_escape_string_type );
+           return;
        case blob_type:
           *reinterpret_cast<blob**>(this)  =
              new blob(**reinterpret_cast<const const_blob_ptr*>(&v) );
@@ -252,6 +268,7 @@ variant& variant::operator=( const variant& v )
             new variants((**reinterpret_cast<const const_variants_ptr*>(&v)));
          break;
       case string_type:
+      case no_escape_string_type: //ultra-adam
          *reinterpret_cast<string**>(this)  = new string((**reinterpret_cast<const const_string_ptr*>(&v)) );
          break;
       case blob_type:
@@ -284,7 +301,8 @@ void  variant::visit( const visitor& v )const
          v.handle( *reinterpret_cast<const bool*>(this) );
          return;
       case string_type:
-         v.handle( **reinterpret_cast<const const_string_ptr*>(this) );
+      case no_escape_string_type:
+          v.handle( **reinterpret_cast<const const_string_ptr*>(this) );
          return;
       case array_type:
          v.handle( **reinterpret_cast<const const_variants_ptr*>(this) );
@@ -312,7 +330,7 @@ bool variant::is_null()const
 
 bool variant::is_string()const
 {
-   return get_type() == string_type;
+   return get_type() == string_type || get_type() == no_escape_string_type;
 }
 bool variant::is_bool()const
 {
@@ -378,6 +396,7 @@ int64_t variant::as_int64()const
    switch( get_type() )
    {
       case string_type:
+      case no_escape_string_type:
           return to_int64(**reinterpret_cast<const const_string_ptr*>(this));
       case double_type:
           return int64_t(*reinterpret_cast<const double*>(this));
@@ -399,6 +418,7 @@ uint64_t variant::as_uint64()const
    switch( get_type() )
    {
       case string_type:
+      case no_escape_string_type:
           return to_uint64(**reinterpret_cast<const const_string_ptr*>(this));
       case double_type:
           return static_cast<uint64_t>(*reinterpret_cast<const double*>(this));
@@ -421,6 +441,7 @@ double  variant::as_double()const
    switch( get_type() )
    {
       case string_type:
+      case no_escape_string_type:
           return to_double(**reinterpret_cast<const const_string_ptr*>(this));
       case double_type:
           return *reinterpret_cast<const double*>(this);
@@ -442,6 +463,7 @@ bool  variant::as_bool()const
    switch( get_type() )
    {
       case string_type:
+      case no_escape_string_type:
       {
           const string& s = **reinterpret_cast<const const_string_ptr*>(this);
           if( s == "true" )
@@ -470,6 +492,7 @@ string    variant::as_string()const
    switch( get_type() )
    {
       case string_type:
+      case no_escape_string_type:
           return **reinterpret_cast<const const_string_ptr*>(this);
       case double_type:
           return to_string(*reinterpret_cast<const double*>(this));
@@ -521,6 +544,7 @@ blob variant::as_blob()const
       case null_type: return blob();
       case blob_type: return get_blob();
       case string_type:
+      case no_escape_string_type:
       {
          const string& str = get_string();
          if( str.size() == 0 ) return blob();
@@ -573,7 +597,7 @@ size_t            variant::size()const
 
 const string&        variant::get_string()const
 {
-  if( get_type() == string_type )
+  if( get_type() == string_type  || get_type() == no_escape_string_type)
      return **reinterpret_cast<const const_string_ptr*>(this);
   FC_THROW_EXCEPTION( bad_cast_exception, "Invalid cast from type '${type}' to string", ("type",get_type()) );
 }

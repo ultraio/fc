@@ -199,7 +199,8 @@ namespace fc
            string_type = 5,
            array_type  = 6,
            object_type = 7,
-           blob_type   = 8
+           blob_type   = 8,
+           no_escape_string_type = 9 // ultra-adam
         };
 
         /// Constructs a null_type variant
@@ -225,6 +226,7 @@ namespace fc
         variant( bool val );
         variant( blob val );
         variant( fc::string val );
+        variant( std::string val, bool escape ); // ultra-adam
         variant( variant_object );
         variant( mutable_variant_object );
         variant( variants );
@@ -677,5 +679,5 @@ namespace fc
 
 #include <fc/reflect/reflect.hpp>
 FC_REFLECT_TYPENAME( fc::variant )
-FC_REFLECT_ENUM( fc::variant::type_id, (null_type)(int64_type)(uint64_type)(double_type)(bool_type)(string_type)(array_type)(object_type)(blob_type) )
+FC_REFLECT_ENUM( fc::variant::type_id, (null_type)(int64_type)(uint64_type)(double_type)(bool_type)(string_type)(array_type)(object_type)(blob_type)(no_escape_string_type) )
 FC_REFLECT( fc::blob, (data) );
